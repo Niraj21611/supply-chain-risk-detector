@@ -1,0 +1,86 @@
+version: "3.8"
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    volumes:
+      - ./kafka/create-topics.sh:/create-topics.sh
+      - ./kafka/kafka.env:/kafka.env
+    command: "bash -c '/create-topics.sh && /etc/confluent/docker/run'"
+
+  auth-db:
+    image: postgres:15
+    container_name: auth-db
+    environment:
+      POSTGRES_USER: authuser
+      POSTGRES_PASSWORD: authpass
+      POSTGRES_DB: authdb
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./postgres/auth-init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  admin-db:
+    image: postgres:15
+    container_name: admin-db
+    environment:
+      POSTGRES_USER: adminuser
+      POSTGRES_PASSWORD: adminpass
+      POSTGRES_DB: admindb
+    ports:
+      - "5434:5432"
+    volumes:
+      - ./postgres/admin-init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  shipment-db:
+    image: postgres:15
+    container_name: shipment-db
+    environment:
+      POSTGRES_USER: shipuser
+      POSTGRES_PASSWORD: shippass
+      POSTGRES_DB: shipmentdb
+    ports:
+      - "5435:5432"
+    volumes:
+      - ./postgres/shipment-init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  alert-db:
+    image: postgres:15
+    container_name: alert-db
+    environment:
+      POSTGRES_USER: alertuser
+      POSTGRES_PASSWORD: alertpass
+      POSTGRES_DB: alertdb
+    ports:
+      - "5436:5432"
+    volumes:
+      - ./postgres/alert-init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@supply.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
