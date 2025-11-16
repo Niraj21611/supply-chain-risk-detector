@@ -1,4 +1,4 @@
-package package com.supplychain.authservice.service;
+package com.supplychain.authservice.service;
 
 import com.supplychain.authservice.model.RefreshToken;
 import com.supplychain.authservice.model.User;
@@ -39,7 +39,9 @@ public class AuthService {
         return refreshRepo.findByToken(token).filter(rt -> rt.getExpiresAt().isAfter(Instant.now()));
     }
 
-    public void revokeRefreshToken(String token) { refreshRepo.deleteByToken(token); }
+    public void revokeRefreshToken(String token) {
+        refreshRepo.deleteByToken(token);
+    }
 
     public String createAccessToken(User u) {
         List<String> roles = Collections.singletonList(u.getRole());
@@ -56,4 +58,12 @@ public class AuthService {
             return userRepo.save(u);
         });
     }
+
+    // Get user by ID safely
+    public User getUserById(Long id) {
+        return userRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+    }
+
+
 }

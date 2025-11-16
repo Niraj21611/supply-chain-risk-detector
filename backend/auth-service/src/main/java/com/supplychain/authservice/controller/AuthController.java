@@ -41,7 +41,7 @@ public class AuthController {
         if (rtOpt.isEmpty()) return ResponseEntity.status(401).body(Map.of("error", "Invalid refresh token"));
 
         RefreshToken rt = rtOpt.get();
-        User u = authService.userRepo.findById(rt.getUserId()).orElseThrow();
+        User u = authService.getUserById(rt.getUserId());
         String access = authService.createAccessToken(u);
         return ResponseEntity.ok(Map.of("accessToken", access));
     }

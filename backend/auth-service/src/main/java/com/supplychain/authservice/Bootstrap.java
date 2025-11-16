@@ -1,6 +1,8 @@
 package com.supplychain.authservice;
 
 import lombok.RequiredArgsConstructor;
+import com.supplychain.authservice.service.AuthService;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
